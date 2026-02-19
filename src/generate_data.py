@@ -3,67 +3,49 @@ import numpy as np
 
 # generate_orders 함수 정의
 # 직접 데이터 입력
-def generate_orders():
-    pass
-
-data = {
-    # 주문번호
-    "order_id": [1, 2, 3, 4, 5],
-
-    # 주문자
-    "customer_id": ["C001", "C002", "", "C004", None],
-
-    # 주문일자:
-    "order_date": [
-        "2025-01-10",
-        "2025-01-11",
-        "",                 # 결측
-        "2025-01-13",
-        "2025-01-14"
-    ],
-    # 상품명
-    "product": [
-        "Laptop",
-        "Mouse",
-        "Keyboard",
-        "Monitor",
-        ""
-    ],
-    # 카테고리
-    "category": [
-        "Electronics",
-        "Electronics",
-        "Electronics",
-        "",
-        "Accessories"
-    ],
-    # 가격: 정상 + NaN
-    "price": [
-        1200.0,
-        25.5,
-        np.nan,   # NaN
-        300.0,
-        -50.0     # 이상값(음수)
-    ],
-    # 수량
-    "quantity": [
-        1,
-        2,
-        0,    # 이상값
-        -1,   # 이상값
-        3
-    ],
-    # 총 금액
-    "total_amount": [
-        1200.0,    # 정상
-        51.0,      # 정상
-        0.0,       # 계산 불가 (price NaN)
-        -300.0,    # 잘못된 값
-        None       # 결측
-    ],
+products = np.array(["KeyBoard", "Mouse", "Computer", "Laptop"])
+mapping = {
+    "KeyBoard": "Electronics",
+    "Mouse": "Electronics",
+    "Computer": "Electronics",
+    "Laptop": "Electronics",
 }
 
-df = pd.DataFrame(data)
+def generate_orders(n_rows):
+    order_id = np.arange(1, n_rows + 1)
+
+    customer_id = np.random.randint(1, 101, n_rows)
+
+    today = pd.Timestamp.today()
+    random_days = np.random.randint(0, 365, n_rows)
+    order_date = today - pd.to_timedelta(random_days, unit="D")
+
+    product = np.random.choice(products, size = n_rows)
+
+    category = pd.Series(product).map(mapping).values
+
+    price = np.random.uniform(10, 10000, n_rows)
+    mask = np.random.rand(n_rows) < 0.05
+    price[mask] = np.nan
+
+    quantity = np.random.randint(1, 6, n_rows)
+    mask_zero = np.random.rand(n_rows) < 0.1
+    quantity[mask_zero] = 0
+
+    total_amount = price * quantity
+
+    df = pd.DataFrame({
+        "order_id": order_id,
+        "customer_id": customer_id,
+        "order_date": order_date,
+        "product": product,
+        "category": category,
+        "price": price,
+        "quantity": quantity,
+        "total_amount": total_amount
+    })
+
+    return df
 
 # save 함수 정의
 def save():
@@ -71,7 +53,8 @@ def save():
 
 # main 함수
 def main():
-    print(df)
+    df = generate_orders(1000)
+    print(df.head())
 
 if __name__ == "__main__":
     main()
