@@ -2,7 +2,7 @@ import numpy as np
 
 y = np.random.randint(100)
 
-print(y)
+# print(y)
 
 # randint 는  randint(low, high) 식으로도 사용 가능
 def test():
@@ -13,4 +13,10 @@ def test():
             print("100 등장 !!")
             break
 
-test()
+def zfill():
+    ex = "1234"
+    print(ex.zfill(5))
+    print(ex.zfill(7))
+
+zfill()
+# test()

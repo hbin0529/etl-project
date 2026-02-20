@@ -3,37 +3,76 @@ import numpy as np
 
 # generate_orders 함수 정의
 # 직접 데이터 입력
-products = np.array(["KeyBoard", "Mouse", "Computer", "Laptop"])
-mapping = {
+# 상수는 소문자 -> 대문자로 입력하기
+PRODUCTS = np.array([
+    "KeyBoard",
+    "Mouse", 
+    "Computer", 
+    "Vacuum",
+    "Ring", 
+    "Necklace", 
+    "Notebook", 
+    "Sofa", 
+    "Bed",
+    ])
+CATEGORY_MAPPING = {
     "KeyBoard": "Electronics",
     "Mouse": "Electronics",
     "Computer": "Electronics",
-    "Laptop": "Electronics",
+    "Vacuum": "Electronics",
+    "Ring":"Accessories",
+    "Necklace":"Accessories",
+    "Notebook":"Office",
+    "Sofa":"Furniture",
+    "Bed":"Furniture",
 }
 
-def generate_orders(n_rows):
+def generate_orders(n_rows: int, seed: int | None = None) -> pd.DataFrame:
+    if seed is not None:
+        np.random.seed(seed)
+
     order_id = np.arange(1, n_rows + 1)
 
-    customer_id = np.random.randint(1, 101, n_rows)
+    customer_raw = np.random.randint(1, 101, n_rows)
 
-    today = pd.Timestamp.today()
+    # 기존 customer_id : int -> str 변경 및 구조 변형
+    # customer_id = np.random.randint(1, 101, n_rows)
+    # customer_id = "C" + pd.Series(customer_id).astype(str).str.zfill(3)  # -> object
+    customer_id = (
+        pd.Series(customer_raw)
+        .astype(str)
+        .str.zfill(3)
+        .radd("C")
+    )
+    # print('customer_id_str의 데이터 타입은 ?? :', customer_id_str.dtype)
+    # print('customer_id_str2의 데이터 타입은 ?? :', customer_id_str2.dtype)
+    # print('customer_id_str3의 데이터 타입은 ?? :', customer_id_str3.dtype)
+
+    today = pd.Timestamp.today().normalize() # .normalize() 추가 : 시간 제거(날짜만 유지)
     random_days = np.random.randint(0, 365, n_rows)
     order_date = today - pd.to_timedelta(random_days, unit="D")
 
-    product = np.random.choice(products, size = n_rows)
+    product = np.random.choice(PRODUCTS, size = n_rows)
 
-    category = pd.Series(product).map(mapping).values
+    category = pd.Series(product).map(CATEGORY_MAPPING)
 
     price = np.random.uniform(10, 10000, n_rows)
-    mask = np.random.rand(n_rows) < 0.05
-    price[mask] = np.nan
+    price[np.random.rand(n_rows) < 0.05] = np.nan
+    # mask = np.random.rand(n_rows) < 0.05
+    # price[mask] = np.nan
+
 
     quantity = np.random.randint(1, 6, n_rows)
-    mask_zero = np.random.rand(n_rows) < 0.1
-    quantity[mask_zero] = 0
+    # mask_zero = np.random.rand(n_rows) < 0.1
+    # quantity[mask_zero] = 0
+    quantity[np.random.rand(n_rows) < 0.1] = 0
 
+
+    # mask_error = np.random.rand(n_rows) < 0.03
     total_amount = price * quantity
+    total_amount[np.random.rand(n_rows) < 0.03] *= -1
 
+# DataFrame
     df = pd.DataFrame({
         "order_id": order_id,
         "customer_id": customer_id,
@@ -44,7 +83,8 @@ def generate_orders(n_rows):
         "quantity": quantity,
         "total_amount": total_amount
     })
-
+    # print(df.dtypes)
+    # print(type(df["price"]))
     return df
 
 # save 함수 정의
