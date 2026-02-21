@@ -89,6 +89,20 @@ def generate_orders(n_rows: int, seed: int | None = None) -> pd.DataFrame:
 
 # save 함수 정의
 def save():
+    # 저장 위치
+    # data/raw/
+
+    # 파일명 규칙
+    # raw_orders_YYYYMMDD_HHMMSS.csv
+
+    # 저장 옵션 
+    # index = False
+    # encoding = "utf-8-sig" 고려
+
+    # 파일관리
+    # 최근 N개만 유지 방식
+    # 예: 최근 50개만 유지하고 나머지 삭제 -> 보통 실무에서 7일, 30일 단위로 유지
+    
     pass
 
 # main 함수
