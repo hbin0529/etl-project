@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
+from utils import save
 
 # generate_orders 함수 정의
 # 직접 데이터 입력
@@ -72,7 +74,7 @@ def generate_orders(n_rows: int, seed: int | None = None) -> pd.DataFrame:
     total_amount = price * quantity
     total_amount[np.random.rand(n_rows) < 0.03] *= -1
 
-# DataFrame
+    # DataFrame
     df = pd.DataFrame({
         "order_id": order_id,
         "customer_id": customer_id,
@@ -88,31 +90,67 @@ def generate_orders(n_rows: int, seed: int | None = None) -> pd.DataFrame:
     return df
 
 # save 함수 정의
-def save(df, base_dir = "data/raw/", prefix = "raw_orders", keep_last = 50):
+def save_old(df: pd.DataFrame, base_dir = "../data/raw", prefix = "dataset222", keep_last = 50) -> str:
+    """    
+    df를 base_dir에 prefix_YYYYMMDD_HHMMSS.csv 형태로 저장하고, 
+    동일 prefix 파일이 keep_last 개수 초과하면 오래된 것부터 삭제한다.
+    return: 저장된 파일 경로(str)
+    """
     """
     저장 위치
     data/raw/
 
-    파일명 규칙
-    raw_orders_YYYYMMDD_HHMMSS.csv
-
     저장 옵션 
     index = False
     encoding = "utf-8-sig" 고려
-
-    파일관리
-    최근 N개만 유지 방식
-    예: 최근 50개만 유지하고 나머지 삭제 -> 보통 실무에서 7일, 30일 단위로 유지
     """
 
-    
+    # 1. base_dir 폴더 준비
+    base_path = Path(base_dir) # base_dir = data/raw
+    base_path.mkdir(parents=True, exist_ok=True)
+    # base_dir.mkdir(parents=True, exist_ok=True)
 
-    pass
+    # 2. timestamp 만들기(YYYYMMDD_HHMMSS)
+    now = pd.Timestamp.now()
+    timestamp = now.strftime("%Y%m%d_%H%M%S") # 20260223_112542
+    # timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+    # now.strftime("%Y%m%d_%H%M%S")
+
+    # 3. 파일명 / 경로 만들기
+    filename = f"{prefix}_{timestamp}.csv"
+    file_path = base_path / filename
+
+    # 4. 저장 (인덱스 저장 안함)
+    # utf-8-sig : BOM을 포함하여 눈에 보이지 않는 특정 byte를 넣은 다음 이것을 해석하여 
+    #             정확히 어떤 인코딩 방식이 사용 되었는지 알아내는 방법을 나타냄
+    df.to_csv(file_path, index=False, encoding="utf-8-sig") 
+
+    # df.to_csv(filename)
+
+    # 5. cleanup : prefix_*.csv 파일만 모아서 오래된 것 삭제
+    files = list(base_dir.glob(f"{prefix}_*.csv"))
+    files.sort()
+
+    excess = len(files) - keep_last
+    if excess > 0:
+        for old_file in files[:excess]:
+            old_file.unlink()
+    
+    # 6. 저장된 경로 반환
+    
+    return str(file_path)
 
 # main 함수
 def main():
-    df = generate_orders(1000)
-    print(df.head())
+    # df = generate_orders(1000)
+    # print(df.head())
+    orders = generate_orders(1000)
+    # print(orders.head())
+    # print(orders.shape)
+    # print(orders.isna().sum())
+
+    save_path = save(orders, prefix="orders")
+    print(f"저장 완료: {save_path}")
 
 if __name__ == "__main__":
     main()

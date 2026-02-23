@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 y = np.random.randint(100)
 
@@ -18,5 +19,13 @@ def zfill():
     print(ex.zfill(5))
     print(ex.zfill(7))
 
-zfill()
+def pdnow():
+    now = pd.Timestamp.now()
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
+    # timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+    print(timestamp)
+
+
+pdnow()
+# zfill()
 # test()
