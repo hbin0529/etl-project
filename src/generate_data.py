@@ -89,6 +89,13 @@ def generate_orders(n_rows: int, seed: int | None = None) -> pd.DataFrame:
     # print(type(df["price"]))
     return df
 
+def process_orders(raw_df: pd.DataFrame) -> pd.DataFrame:
+    df = raw_df.copy()
+    # is_quantity_invalid 컬럼 추가
+    # is_quantity_invalid = 
+
+    return df
+
 # save 함수 정의
 def save_old(df: pd.DataFrame, base_dir = "../data/raw", prefix = "dataset222", keep_last = 50) -> str:
     """    
