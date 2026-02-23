@@ -149,7 +149,7 @@ def main():
     # print(orders.shape)
     # print(orders.isna().sum())
 
-    save_path = save(orders, prefix="orders")
+    save_path = save(orders, prefix="orders", keep_last=50)
     print(f"저장 완료: {save_path}")
 
 if __name__ == "__main__":
