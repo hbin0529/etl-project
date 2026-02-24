@@ -92,72 +92,31 @@ def generate_orders(n_rows: int, seed: int | None = None) -> pd.DataFrame:
 def process_orders(raw_df: pd.DataFrame) -> pd.DataFrame:
     df = raw_df.copy()
     # is_quantity_invalid 컬럼 추가
-    # is_quantity_invalid = 
+    df["is_quantity_invalid"] = df["quantity"] <= 0
 
     return df
 
-# save 함수 정의
-def save_old(df: pd.DataFrame, base_dir = "../data/raw", prefix = "dataset222", keep_last = 50) -> str:
-    """    
-    df를 base_dir에 prefix_YYYYMMDD_HHMMSS.csv 형태로 저장하고, 
-    동일 prefix 파일이 keep_last 개수 초과하면 오래된 것부터 삭제한다.
-    return: 저장된 파일 경로(str)
-    """
-    """
-    저장 위치
-    data/raw/
-
-    저장 옵션 
-    index = False
-    encoding = "utf-8-sig" 고려
-    """
-
-    # 1. base_dir 폴더 준비
-    base_path = Path(base_dir) # base_dir = data/raw
-    base_path.mkdir(parents=True, exist_ok=True)
-    # base_dir.mkdir(parents=True, exist_ok=True)
-
-    # 2. timestamp 만들기(YYYYMMDD_HHMMSS)
-    now = pd.Timestamp.now()
-    timestamp = now.strftime("%Y%m%d_%H%M%S") # 20260223_112542
-    # timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
-    # now.strftime("%Y%m%d_%H%M%S")
-
-    # 3. 파일명 / 경로 만들기
-    filename = f"{prefix}_{timestamp}.csv"
-    file_path = base_path / filename
-
-    # 4. 저장 (인덱스 저장 안함)
-    # utf-8-sig : BOM을 포함하여 눈에 보이지 않는 특정 byte를 넣은 다음 이것을 해석하여 
-    #             정확히 어떤 인코딩 방식이 사용 되었는지 알아내는 방법을 나타냄
-    df.to_csv(file_path, index=False, encoding="utf-8-sig") 
-
-    # df.to_csv(filename)
-
-    # 5. cleanup : prefix_*.csv 파일만 모아서 오래된 것 삭제
-    files = list(base_dir.glob(f"{prefix}_*.csv"))
-    files.sort()
-
-    excess = len(files) - keep_last
-    if excess > 0:
-        for old_file in files[:excess]:
-            old_file.unlink()
-    
-    # 6. 저장된 경로 반환
-    
-    return str(file_path)
-
 # main 함수
 def main():
+    # raw 저장
+    raw_orders = generate_orders(1000)
+    save(raw_orders, prefix="orders_raw")
+
+    # processed 저장
+    processed_orders = process_orders(raw_orders)
+    save(processed_orders, prefix="orders_processed")
+
+    print(f"저장 완료 : {processed_orders}")
+    
     # df = generate_orders(1000)
     # print(df.head())
-    orders = generate_orders(1000)
+    # orders = generate_orders(1000)
     # print(orders.head())
     # print(orders.shape)
     # print(orders.isna().sum())
 
-    save_path = save(orders, prefix="orders", keep_last=50)
-    print(f"저장 완료: {save_path}")
+    # save_path = save(orders, prefix="orders", keep_last=50)
+    # print(f"저장 완료: {save_path}")
 
 if __name__ == "__main__":
     main()
