@@ -116,23 +116,38 @@ def process_orders(raw_df: pd.DataFrame) -> pd.DataFrame:
 def main():
     # raw 저장
     raw_orders = generate_orders(1000)
-    save(raw_orders, prefix="orders_raw")
+    raw_path = save(raw_orders, prefix="orders_raw")
 
     # processed 저장
     processed_orders = process_orders(raw_orders)
-    save(processed_orders, prefix="orders_processed")
+    processed_path = save(processed_orders, prefix="orders_processed")
 
-    print(f"저장 완료 : {processed_orders}")
+    # rows=1000 | invalid_quantity=12 | missing_price=45
+    rows = processed_orders.shape[0]
+    invalid_quantity_count = processed_orders["is_quantity_invalid"].sum()
+    missing_price_count = processed_orders["price"].isna().sum()
+
+    # f-string 사용
+    summary_log = (
+        f"[SUMMARY] rows = {rows} | " 
+        f"invalid_quantity = {invalid_quantity_count} | "
+        f"missing_price = {missing_price_count}"
+    )
     
-    # df = generate_orders(1000)
-    # print(df.head())
-    # orders = generate_orders(1000)
-    # print(orders.head())
-    # print(orders.shape)
-    # print(orders.isna().sum())
+    print(f"[RAW_SAVED] {raw_path}")
+    print(f"[PROCESSED_SAVED] {processed_path}")
+    print(summary_log)
 
-    # save_path = save(orders, prefix="orders", keep_last=50)
-    # print(f"저장 완료: {save_path}")
+
+    
+    """
+    main 에서 출력할 로그 항목
+    생성 행 수 : rows
+    raw 저장 경로
+    processed 저장 경로
+    invalid 건수 : invalid_quantity_count
+    price 결측 개수 : missing_price_count
+    """
 
 if __name__ == "__main__":
     main()
