@@ -112,6 +112,9 @@ def process_orders(raw_df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def generate_customer(orders: pd.DataFrame) -> pd.DataFrame:
+    df = orders.copy()
+
 # main 함수
 def main():
     # raw 저장
