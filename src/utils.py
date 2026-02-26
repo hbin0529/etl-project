@@ -2,8 +2,11 @@ import pandas as pd
 from pathlib import Path
 import warnings
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_DATA_DIR = BASE_DIR / "data" / "raw"
+
 # save 함수 정의
-def save(df: pd.DataFrame, base_dir = "../data/raw", prefix = "dataset", keep_last = 50) -> str:
+def save(df: pd.DataFrame, base_dir = DEFAULT_DATA_DIR, prefix = "dataset", keep_last = 50) -> str:
     """    
     df를 base_dir에 prefix_YYYYMMDD_HHMMSS.csv 형태로 저장하고, 
     동일 prefix 파일이 keep_last 개수 초과하면 오래된 것부터 삭제한다.
