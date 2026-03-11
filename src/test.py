@@ -3,10 +3,13 @@ import pandas as pd
 
 y = np.random.randint(100)
 
-col = ['col1','col2','col3','col4','col5']
-row = ['row1','row2','row3','row4']
-data = [[1,2,3,pd.NA,5],[6,pd.NA,8,pd.NA,10],[11,12,13,14,15],[pd.NA,pd.NA,pd.NA,pd.NA,pd.NA]]
-df = pd.DataFrame(data, row, col)
+# data = [[1,2,3,pd.NA,5],[6,pd.NA,8,pd.NA,10],[11,12,13,14,15],[pd.NA,pd.NA,pd.NA,pd.NA,pd.NA]]
+data = [[1,10,100],[2,20,200],[3,30,300]]
+col = ['col1','col2','col3']
+row = ['row1','row2','row3']
+df = pd.DataFrame(data = data, index = row, columns = col)
+result = df.add(1)
+result2 = result.radd(1)
 
 # print(y)
 
@@ -31,7 +34,9 @@ def pdnow():
     print(timestamp)
 
 def test2():
-    print(df.dropna())
+    # print(df)
+    print(result)
+    print(result2)
 
 test2()
 # pdnow()
