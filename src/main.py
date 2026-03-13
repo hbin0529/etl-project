@@ -1,6 +1,7 @@
 from generate import generate_orders
 from process import process_orders
 from utils import save_csv
+from load_postgres import load_orders_to_postgres
 from config import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
 # 전체 ETL 실행 순서 제어
@@ -30,6 +31,14 @@ def main() -> None:
         base_dir = PROCESSED_DATA_DIR,
         prefix="orders_processed",
     )
+
+    # PostgreSQL 적재
+    load_orders_to_postgres(
+        df = processed_orders, 
+        table_name = "orders_processed",
+        if_exists = "replace",
+    )
+
     # summary 로그 출력
     rows = processed_orders.shape[0]
     invalid_quantity_count = int(processed_orders["is_quantity_invalid"].sum())

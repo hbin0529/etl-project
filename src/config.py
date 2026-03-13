@@ -1,18 +1,8 @@
 from pathlib import Path
 import numpy as np
+import os
 
 # 경로, 상수, 기본 설정 관리
-"""
-BASE_DIR
-DATA_DIR
-RAW_DATA_DIR
-PROCESSED_DATA_DIR
-
-상품 목록
-카테고리 매핑
-
-즉, 설정값 / 상수 전용
-"""
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
@@ -41,3 +31,10 @@ CATEGORY_MAPPING = {
     "Sofa":"Furniture",
     "Bed":"Furniture",
 }
+
+# PostgreSQL 연결 정보
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "etl_db")
