@@ -1,22 +1,23 @@
+"""
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from utils import save
 
 ####### 랜덤 데이터 전략 세우기 #######
-"""
-날짜는 어떻게 랜덤 생성할 건가?
 
-상품은 리스트로 둘 건가?
+# 날짜는 어떻게 랜덤 생성할 건가?
 
-카테고리는 매핑할 건가?
+# 상품은 리스트로 둘 건가?
 
-가격은 정수? float?
+# 카테고리는 매핑할 건가?
 
-수량 범위는?
+# 가격은 정수? float?
 
-일부 결측치는 어떻게 넣을 건가?
-"""
+# 수량 범위는?
+
+# 일부 결측치는 어떻게 넣을 건가?
+
 
 
 # generate_orders 함수 정의
@@ -125,15 +126,13 @@ def main():
     print(summary_log)
 
 
-    
-    """
-    main 에서 출력할 로그 항목
-    생성 행 수 : rows
-    raw 저장 경로
-    processed 저장 경로
-    invalid 건수 : invalid_quantity_count
-    price 결측 개수 : missing_price_count
-    """
+#     main 에서 출력할 로그 항목
+#     생성 행 수 : rows
+#     raw 저장 경로
+#     processed 저장 경로
+#     invalid 건수 : invalid_quantity_count
+#     price 결측 개수 : missing_price_count
 
 if __name__ == "__main__":
     main()
+"""
