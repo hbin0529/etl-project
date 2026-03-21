@@ -1,77 +1,178 @@
-## 프로젝트의 목적
-본 프로젝트는 파일 기반 ETL 파이프라인을 구현한 미니 데이터 엔지니어링 프로젝트입니다.
-랜덤 주문 데이터를 생성하여 Raw 계층에 저장하고, Processed 계층에서 품질 플래그를 추가하여 데이터 이상 여부를 추적할 수 있도록 설계했습니다.
-또한 실행 로그를 통해 데이터 품질 상태를 검증할 수 있습니다.
+# ETL Project
+
+## 프로젝트 개요
+본 프로젝트는 **데이터 엔지니어 포트폴리오용 ETL 파이프라인 프로젝트**입니다.  
+랜덤 주문 데이터를 생성한 뒤, Raw / Processed 계층으로 분리 저장하고,  
+품질 검증 컬럼을 추가한 후 PostgreSQL에 적재하여 **분석용 데이터 마트**까지 생성하는 흐름을 구현했습니다.
+
+단순 CSV 생성 스크립트가 아니라,  
+**원천 데이터 보존 → 정제 → 적재 → 집계 마트 생성**의 흐름을 갖춘  
+미니 데이터 파이프라인을 목표로 설계했습니다.
+
+## 프로젝트 목적
+이 프로젝트의 목적은 다음과 같습니다.
+
+- 파일 기반 ETL 구조를 직접 설계하고 구현
+- Raw / Processed 데이터 레이어 분리
+- 데이터 품질 검증 로직 추가
+- PostgreSQL 적재를 통한 서빙 계층 구성
+- 집계 마트 생성 과정을 통해 데이터 엔지니어링 흐름 학습
+- 추후 Spark / Airflow 기반 구조로 확장 가능한 포트폴리오 기반 마련
+
+---
+
+## 기술 스택
+- Python
+- pandas
+- numpy
+- PostgreSQL
+- SQLAlchemy
 
 ## 문제 정의
-단순 CSV 데이터 생성이 아닌, 
-실행 이력 관리 및 데이터 품질 검증이 가능한 
-파일 기반 ETL 구조를 설계하는 것을 목표로 했습니다.
+단순 CSV 파일을 생성하고 끝내는 것이 아니라, 
+다음곽 ㅏㅌ은 데이터 엔지니어링 관점의 문제를 해결하는 것을 목표로 했습니다.
 
-Raw 데이터를 보존하면서도, 
-가공 계층에서 품질 상태를 추적할 수 있는 구조를 구현했습니다.
+1. **원천 데이터(raw)를 어떻게 보존할 것인가**
+2. **가공 데이터(processed)에 품질 상태를 어떻게 반영할 것인가**
+3. **가공된 데이터를 어떻게 PostgreSQL에 적재할 것인가**
+4. **정제된 상세 데이터로부터 분석용 집계 마트를 어떻게 생성할 것인가**
+5. **향후 Spark / Airflow 환경으로 확장 가능한 구조를 어떻게 미리 설계할 것인가**
+
+---
+
+## 현재 구현 범위
+
+### 1. 주문 데이터 생성
+- Python / pandas / numpy 기반 랜덤 주문 데이터 생성
+- `order_id`, `customer_id`, `order_date`, `product`, `category`, `price`, `quantity`, `total_amount` 컬럼 구성
+
+### 2. Raw / Processed 레이어 분리
+- Raw 계층: 원천 주문 데이터 저장
+- Processed 계층: 품질 검증 컬럼이 추가된 정제 데이터 저장
+
+### 3. 데이터 품질 검증
+Processed 단계에서 아래 품질 검증 컬럼을 생성합니다.
+
+- `is_quantity_invalid`
+- `is_price_missing`
+- `is_total_amount_invalid`
+- `quality_flag`
+
+### 4. PostgreSQL 적재
+- Processed 데이터를 PostgreSQL `orders_processed` 테이블에 적재
+- 초기 단계에서는 `replace` 방식으로 전체 적재
+
+### 5. 집계 마트 생성
+- `orders_processed`를 기반으로 `daily_sales_summary` 테이블 생성
+- 일자별 주문 수 / 유효 주문 수 / 비정상 주문 수 / 총매출 / 평균 주문금액 집계
+
+---
 
 ## 설계 의도
-- Raw 계층과 Processed 계층을 분리하여 원천 데이터 보존 및 재처리 가능 구조를 설계했습니다.
-- Processed 단계에서 품질 플래그(is_quantity_invalid)를 추가하여 데이터 이상 여부를 추적할 수 있도록 구현했습니다.
-- 파일 보존 정책(keep_last)을 적용하여 실행 이력을 관리하고, 과도한 파일 적재를 방지하도록 설계했습니다.
-- 실행 로그를 통해 데이터 건수 및 품질 상태를 요약하여 모니터링 가능하도록 구성했습니다.
 
-## ETL 아키텍처 흐름도
+### Raw / Processed 분리
+원천 데이터를 보존하여 재처리 가능성을 확보하고,  
+가공 데이터와 원본 데이터를 명확히 분리하기 위해 Raw / Processed 레이어를 나눴습니다.
+
+### 품질 검증 컬럼 추가
+정제 과정에서 단순히 데이터를 제거하지 않고,  
+**어떤 데이터가 왜 비정상인지 추적할 수 있도록** 품질 검증 컬럼을 별도로 추가했습니다.
+
+### 파일 저장 이력 관리
+실행 시점별 CSV 파일을 timestamp 기반으로 저장하고,  
+`keep_last` 정책으로 과도한 파일 적재를 방지할 수 있도록 설계했습니다.
+
+### PostgreSQL 적재
+가공 결과를 파일로만 두지 않고,  
+PostgreSQL에 적재하여 **조회 가능한 서빙 계층**을 구성했습니다.
+
+### 데이터 마트 생성
+정제된 상세 데이터(`orders_processed`)와  
+분석용 집계 데이터(`daily_sales_summary`)를 분리함으로써  
+데이터 레이어 개념을 반영했습니다.
+
+---
+
+
+## ETL 아키텍처 흐름
+
+### 현재 구현 구조
 ```
 generate_orders
    ↓
-save (Raw)
+save_csv (Raw)
    ↓
 process_orders
    ↓
-save (Processed)
+save_csv (Processed)
+   ↓
+load_orders_to_postgres
+   ↓
+build_daily_sales_summary
    ↓
 Summary Log 출력
 ```
 
-## 실행 결과 예시
+### 목표 아키텍처 (확장 방향)
 ```
-[RAW_SAVED] ..\data\raw\orders_raw\orders_raw_20260226_135023.csv
-[PROCESSED_SAVED] ..\data\raw\orders_processed\orders_processed_20260226_135023.csv
-[SUMMARY] rows = 1000 | invalid_quantity = 89 | missing_price = 46
-```
-
-## 데이터 품질 전략
-- quantity ≤ 0 → is_quantity_invalid=True
-- price 결측 허용
-- 로그 기반 기대값 검증
-
-## 향후 확장 계획
-- customers / products 데이터셋 추가
-- Processed 계층에 추가 품질 규칙 적용
-- Parquet 저장 형식 확장
-- Batch 실행 스케줄링 적용
-- 고객 및 상품 엔티티를 분리하여 관계형 데이터 구조 확장
-
-## 실행방법
-``` bash
-# 가상환경 활성화
-python -m venv venv
-venv\Scripts\activate
-
-# 프로젝트 루트로 이동
-cd etl-project
-# ETL 실행
-python src/generate_data.py
+Log Generator (Python)
+   ↓
+Raw Layer
+   ↓
+Spark Processing
+   ↓
+PostgreSQL Data Mart
+   ↓
+Airflow DAG
 ```
 
-```
+## 프로젝트 구조
+```text
 etl-project/
 │
 ├─ src/
-│   ├─ generate_data.py        # 데이터 생성 및 ETL 실행 진입점
-│   ├─ utils.py                # 저장 및 파일 관리 로직
+│   ├─ config.py
+│   ├─ generate.py
+│   ├─ process.py
+│   ├─ utils.py
+│   ├─ load_postgres.py
+│   ├─ mart.py
+│   └─ main.py
 │
 ├─ data/
-│   └─ raw/
-│       ├─ orders_raw/         # Raw 계층 (원본 데이터)
-│       └─ orders_processed/   # Processed 계층 (품질 플래그 추가 데이터)
+│   ├─ raw/
+│   │   └─ orders_raw/
+│   └─ processed/
+│       └─ orders_processed/
 │
+├─ requirements.txt
 └─ README.md
 ```
+
+## 실행 방법
+
+### Windows
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python src/main.py
+```
+
+### macOS / Linux
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python src/main.py
+```
+
+## 실행 결과 예시
+```
+[DB_LOAD_SUCCESS] table=orders_processed | rows=1000 | mode=replace
+[MART_BUILD_SUCCESS] table=daily_sales_summary
+[RAW_SAVED] ..\data\raw\orders_raw\orders_raw_20260321_165939.csv
+[PROCESSED_SAVED] ..\data\processed\orders_processed\orders_processed_20260321_165939.csv
+[SUMMARY] rows=1000 | invalid_quantity=113 | missing_price=50 | invalid_total_amount=25 | invalid_rows=138
+```
+## 향후 확장 계획
