@@ -3,6 +3,7 @@ from process import process_orders
 from utils import save_csv
 from load_postgres import load_orders_to_postgres
 from config import RAW_DATA_DIR, PROCESSED_DATA_DIR
+from mart import build_daily_sales_summary
 
 # 전체 ETL 실행 순서 제어
 """
@@ -38,6 +39,8 @@ def main() -> None:
         table_name = "orders_processed",
         if_exists = "replace",
     )
+
+    build_daily_sales_summary()
 
     # summary 로그 출력
     rows = processed_orders.shape[0]
