@@ -66,6 +66,10 @@ Processed 단계에서 아래 품질 검증 컬럼을 생성합니다.
 - `orders_processed`를 기반으로 `daily_sales_summary` 테이블 생성
 - 일자별 주문 수 / 유효 주문 수 / 비정상 주문 수 / 총매출 / 평균 주문금액 집계
 
+### 6. Spark 설계 및 파일 초안 작성 완료
+- Pandas 기반 처리 로직 구현 완료
+- Spark DataFrame 기반 처리 초안 완성
+- Windows 로컬 환경의 Hadoop dependency 이슈로 인해 실행 환경은 추후 macOS/WSL 기준으로 정리 예정
 ---
 
 ## 설계 의도
